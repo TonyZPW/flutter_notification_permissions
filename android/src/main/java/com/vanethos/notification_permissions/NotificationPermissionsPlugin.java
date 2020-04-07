@@ -37,7 +37,13 @@ public class NotificationPermissionsPlugin implements MethodChannel.MethodCallHa
       if (PERMISSION_DENIED.equalsIgnoreCase(getNotificationPermissionStatus())) {
         if (context instanceof Activity) {
 
-          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
+            context.startActivity(intent);
+          }
+          else if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Intent intent = new Intent();
             intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
             intent.putExtra("app_package", context.getPackageName());
