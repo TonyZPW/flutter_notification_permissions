@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -35,12 +36,20 @@ public class NotificationPermissionsPlugin implements MethodChannel.MethodCallHa
     } else if ("requestNotificationPermissions".equalsIgnoreCase(call.method)) {
       if (PERMISSION_DENIED.equalsIgnoreCase(getNotificationPermissionStatus())) {
         if (context instanceof Activity) {
-          final Uri uri = Uri.fromParts("package", context.getPackageName(), null);
 
-          final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-          intent.setData(uri);
-
-          context.startActivity(intent);
+          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Intent intent = new Intent();
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            intent.putExtra("app_package", context.getPackageName());
+            intent.putExtra("app_uid", context.getApplicationInfo().uid);
+            context.startActivity(intent);
+          } else if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            context.startActivity(intent);
+          }
 
           result.success(null);
         } else {
